@@ -5,6 +5,10 @@
 #include <cmath>
 #include <ctime>
 
+#define RED RGB(255, 36, 0)
+#define GREEN RGB(102, 255, 0)
+#define BLUE RGB(125, 249, 255)
+
 typedef void (*func_t)(void);
 typedef double (*graph_t)(double x);
 
@@ -17,28 +21,108 @@ void pencil();
 void fill(double x, double y, COLORREF current);
 void cover_for_fill();
 
-COLORREF color_for_painting = TX_BLACK;
-int is_parametrs_changed = 1;
-double radius_for_painting = 24;
-func_t func_of_drawing = &pencil;
-Point coords0_of_but = { 0, 0 };
-Point coords1_of_but = { 1500, 100 };
-Point coords0_of_main_window = { 0, 100 };
-Point coords1_of_main_window = { 1500, 900 };
+func_t funcOfDrawing = &pencil;
+
+COLORREF colorForPainting = TX_BLACK;
+bool isParametrsChanged = true;
+double radiusForPainting = 24;
+const Point coordLT_OfBut = { 0, 0 };
+const Point coordRB_OfBut = { 1200, 100 };
+const Point coordLT_OfMainWindow = { 0, 100 };
+const Point coordRB_OfMainWindow = { 1200, 600 };
 
 class Window
 {
 public:
-	Point coords0_, coords1_;
+	Point coordLT, coordRB;
 
-	virtual void draw_window()
+	virtual void DrawWindow()
 	{
 		txSetColor(TX_LIGHTGRAY);
 		txSetFillColor(TX_WHITE);
-		txRectangle(coords0_.x, coords0_.y, coords1_.x, coords1_.y);
+		txRectangle(coordLT.x, coordLT.y, coordRB.x, coordRB.y);
 	}
 
-	Window(Point coords0, Point coords1) : coords0_(coords0), coords1_(coords1)
+	Window(Point coordLT_, Point coordRB_) : coordLT(coordLT_), coordRB(coordRB_)
+	{
+	}
+};
+
+class ColorWindow : public Window
+{
+public:
+	virtual void DrawWindow() override
+	{
+		txSetColor(TX_LIGHTGRAY);
+		txSetFillColor(TX_WHITE);
+		txRectangle(coordLT.x, coordLT.y, coordRB.x, coordRB.y);
+
+		txSetFillColor(colorForPainting);
+		txCircle((coordLT.x + coordRB.x) / 2, (coordLT.y + coordRB.y) / 2, radiusForPainting / 2);
+	}
+
+	ColorWindow(Point coordLT_, Point coordRB_) : Window(coordLT_, coordRB_)
+	{
+	}
+};
+
+class BasicButton : public Window
+{
+public:
+	virtual void DrawButton()
+	{
+		txSetColor(TX_LIGHTGRAY);
+		txSetFillColor(TX_WHITE);
+		txRectangle(coordLT.x, coordLT.y, coordRB.x, coordRB.y);
+	}
+
+	virtual bool IfButtonPressed()
+	{
+		const int leftMouseButton = 1;
+
+		if (txMouseButtons() == leftMouseButton &&
+			txMouseX() >= coordLT.x &&
+			txMouseX() <= coordRB.x &&
+			txMouseY() >= coordLT.y &&
+			txMouseY() <= coordRB.y)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	virtual void Action()
+	{
+	}
+
+	BasicButton(Point coordLT_, Point coordRB_) : Window(coordLT_, coordRB_)
+	{
+	}
+};
+
+class SetColorButton : public BasicButton
+{
+public:
+	COLORREF color;
+
+	virtual void DrawButton() override
+	{
+		txSetColor(TX_LIGHTGRAY);
+		txSetFillColor(color);
+		txRectangle(coordLT.x, coordLT.y, coordRB.x, coordRB.y);
+	}
+
+	virtual void Action() override
+	{
+		isParametrsChanged = true;
+		colorForPainting = color;
+	}
+
+	SetColorButton(Point coordLT_, Point coordRB_, COLORREF color_) : BasicButton(coordLT_, coordRB_),
+		color(color_)
 	{
 	}
 };
