@@ -126,3 +126,90 @@ public:
 	{
 	}
 };
+
+class ScrollBar : public BasicButton
+{
+public:
+	COLORREF rgbColor;
+	Point coordLT_OfBar;
+	Point coordRB_OfBar;
+	double* scroller;
+	double difference;
+	const int width = 7;
+
+	virtual void DrawButton() override
+	{
+		txSetColor(TX_LIGHTGRAY);
+		txSetFillColor(TX_WHITE);
+		txRectangle(coordLT.x - width, coordLT.y, coordRB.x + width, coordRB.y);
+
+		coordLT_OfBar = { (coordRB.x + coordLT.x) / 2 - width, coordLT.y };
+		coordRB_OfBar = { (coordRB.x + coordLT.x) / 2 + width, coordRB.y };
+
+		txSetColor(TX_LIGHTGRAY);
+		txSetFillColor(rgbColor);
+		txRectangle(coordLT_OfBar.x, coordLT_OfBar.y, coordRB_OfBar.x, coordRB_OfBar.y);
+	}
+
+	virtual void ActionWithRevolvable()
+	{
+		*scroller = ((coordRB_OfBar.x + coordLT_OfBar.x) / 2 - coordLT.x) / difference + 2;
+	}
+
+	virtual void Action() override
+	{
+		isParametrsChanged = true;
+		double scroll = txMouseX();
+
+		txSetColor(TX_LIGHTGRAY);
+		txSetFillColor(TX_WHITE);
+		txRectangle(coordLT.x - width, coordLT.y, coordRB.x + width, coordRB.y);
+
+		if (scroll > coordLT.x - width && scroll < coordRB.x + width)
+		{
+			coordLT_OfBar.x = scroll - width;
+			coordRB_OfBar.x = scroll + width;
+
+			ActionWithRevolvable();
+
+			txSetFillColor(rgbColor);
+			txRectangle(coordLT_OfBar.x, coordLT_OfBar.y, coordRB_OfBar.x, coordRB_OfBar.y);
+			txSleep(0.1);
+		}
+	}
+
+	ScrollBar(Point coordLT_, Point coordRB_, double* scroller_, double difference_, COLORREF rgbColor_ = TX_LIGHTGRAY) : BasicButton(coordLT_, coordRB_),
+		scroller(scroller_), difference(difference_), rgbColor(rgbColor_)
+	{
+	}
+};
+
+class RGB_ScrollBar : public ScrollBar
+{
+public:
+	COLORREF* scrollerColor;
+	double rgbScroller;
+
+	virtual void ActionWithRevolvable() override
+	{
+		rgbScroller = 255 * ((coordRB_OfBar.x + coordLT_OfBar.x) / 2 - coordLT.x) / (coordRB.x - coordLT.x);
+
+		if (rgbColor == RED)
+		{
+			*scrollerColor = RGB(rgbScroller, txExtractColor(*scrollerColor, TX_GREEN), txExtractColor(*scrollerColor, TX_BLUE));
+		}
+		else if (rgbColor == GREEN)
+		{
+			*scrollerColor = RGB(txExtractColor(*scrollerColor, TX_RED), rgbScroller, txExtractColor(*scrollerColor, TX_BLUE));
+		}
+		else if (rgbColor == BLUE)
+		{
+			*scrollerColor = RGB(txExtractColor(*scrollerColor, TX_RED), txExtractColor(*scrollerColor, TX_GREEN), rgbScroller);
+		}
+	}
+
+	RGB_ScrollBar(Point coordLT_, Point coordRB_, COLORREF* scroller_, COLORREF rgbColor_) : ScrollBar(coordLT_, coordRB_, NULL, NULL, rgbColor_),
+		scrollerColor(scroller_)
+	{
+	}
+};
