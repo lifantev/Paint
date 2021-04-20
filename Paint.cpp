@@ -3,9 +3,12 @@
 int main()
 {
 	txCreateWindow(1200, 600);
+	ManagerButton manager;
 
 	manager.Add(&windowForPainting);
 
+	manager.Add(new SetColorButton({ 505, 10 }, { 530, 35 }, TX_BLACK));
+	manager.Add(new SetColorButton({ 530, 10 }, { 555, 35 }, TX_WHITE));
 	manager.Add(new SetColorButton({ 555, 10 }, { 580, 35 }, TX_LIGHTBLUE));
 	manager.Add(new SetColorButton({ 580, 10 }, { 605, 35 }, TX_LIGHTRED));
 	manager.Add(new SetColorButton({ 605, 10 }, { 630, 35 }, TX_LIGHTGREEN));
@@ -21,8 +24,9 @@ int main()
 	manager.Add(new FunctionalButton({ 0, 50 }, { 50, 100 }, "<<", PrevState));
 	manager.Add(new FunctionalButton({ 50, 50 }, { 100, 100 }, ">>", NextState));
 
+	manager.Add(new InstrumentalButton({ 225, 10 }, { 255, 40 }, Eraser, "eraser.bmp"));
 	manager.Add(new InstrumentalButton({ 260, 10 }, { 290, 40 }, Pencil, "pencil.bmp"));
-	manager.Add(new InstrumentalButton({ 290, 10 }, { 320, 40 }, Spray, "spray.bmp"));
+	manager.Add(new InstrumentalButton({ 295, 10 }, { 325, 40 }, Spray, "spray.bmp"));
 	
 	// TODO: filling, now works with stack corruption most of the time
 	//manager.Add(new InstrumentalButton({ 320, 10 }, { 350, 40 }, CoverForFill, "filling.bmp"));
@@ -67,6 +71,14 @@ void Pencil()
 	}
 }
 
+void Eraser()
+{
+	COLORREF previousColor = colorForPainting;
+	colorForPainting = TX_WHITE;
+	Pencil();
+	colorForPainting = previousColor;
+}
+
 void Spray()
 {
 	srand(time(0));
@@ -109,38 +121,6 @@ void OpenImage()
 	HDC sourceImage = txLoadImage("image.bmp");
 	txTransparentBlt(0, 0, sourceImage);
 	txDeleteDC(sourceImage);
-}
-
-void Fill(double x, double y, COLORREF current)
-{
-	HDC canvas = windowForPainting.ReturnLastCanvas();
-	if (current == txGetPixel(x, y) &&
-		y > windowForPainting.coordLT.y &&
-		y < windowForPainting.coordRB.y &&
-		x > windowForPainting.coordLT.x &&
-		x < windowForPainting.coordRB.x)
-	{
-		for (int i = -1; i <= 1; ++i)
-		{
-			for (int j = -1; j <= 1; ++j)
-			{
-				Fill(x + i, y + j, current);
-				txSetPixel(x, y - COORD_LT_OF_MAIN_WINDOW.y, colorForPainting, canvas);
-				txSetPixel(x, y, colorForPainting);
-			}
-		}
-	}
-	else
-	{
-		return;
-	}
-}
-
-void CoverForFill()
-{
-	Point coords = { txMouseX(), txMouseY() };
-	COLORREF current = txGetPixel(coords.x, coords.y);
-	Fill(coords.x, coords.y, current);
 }
 
 void PrevState()

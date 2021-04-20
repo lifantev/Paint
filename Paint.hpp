@@ -18,6 +18,7 @@ struct Point
 };
 
 void Pencil();
+void Eraser();
 void Fill(double x, double y, COLORREF current);
 void CoverForFill();
 void Spray();
@@ -282,14 +283,14 @@ public:
 		txSetFillColor(TX_TRANSPARENT);
 		HDC sourceImageHDC = txLoadImage(sourceImage);
 
-		txTransparentBlt(coordLT.x, coordRB.y, sourceImageHDC);
+		txTransparentBlt(coordLT.x, coordRB.y - 30, sourceImageHDC);
 		txDeleteDC(sourceImageHDC);
 		txRectangle(coordLT.x, coordLT.y, coordRB.x, coordRB.y);
 	}
 
 	void RedrawButton1()
 	{
-		txSetColor(TX_GRAY, 5);
+		txSetColor(TX_BLACK, 5);
 		txSetFillColor(TX_TRANSPARENT);
 		txRectangle(coordLT.x, coordLT.y, coordRB.x, coordRB.y);
 	}
@@ -313,8 +314,7 @@ public:
 	}
 
 	InstrumentalButton(Point coordLT_, Point coordRB_, func_t function_, const char* sourceImage_) : BasicButton(coordLT_, coordRB_),
-		function(function_),
-		sourceImage(sourceImage_)
+		function(function_), sourceImage(sourceImage_)
 	{
 	}
 };
@@ -469,5 +469,3 @@ public:
 		}
 	}
 };
-
-ManagerButton manager;
