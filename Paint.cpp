@@ -24,18 +24,18 @@ int main()
 	manager.Add(new FunctionalButton({ 0, 50 }, { 50, 100 }, "<<", PrevState));
 	manager.Add(new FunctionalButton({ 50, 50 }, { 100, 100 }, ">>", NextState));
 
-	manager.Add(new InstrumentalButton({ 225, 10 }, { 255, 40 }, Eraser, "eraser.bmp"));
-	manager.Add(new InstrumentalButton({ 260, 10 }, { 290, 40 }, Pencil, "pencil.bmp"));
-	manager.Add(new InstrumentalButton({ 295, 10 }, { 325, 40 }, Spray, "spray.bmp"));
+	manager.Add(new InstrumentalButton({ 225, 10 }, { 255, 40 }, Eraser, "Lib\\eraser.bmp"));
+	manager.Add(new InstrumentalButton({ 260, 10 }, { 290, 40 }, Pencil, "Lib\\pencil.bmp"));
+	manager.Add(new InstrumentalButton({ 295, 10 }, { 325, 40 }, Spray, "Lib\\spray.bmp"));
 	
 	// TODO: filling, now works with stack corruption most of the time
 	//manager.Add(new InstrumentalButton({ 320, 10 }, { 350, 40 }, CoverForFill, "filling.bmp"));
 
 	manager.Add(new ScrollBar({ 267, 60 }, { 507, 90 }, &radiusForPainting, 6));
 
-	manager.Add(new RGB_ScrollBar({ 790, 3 }, { 900, 32 }, &colorForPainting, RGB(255, 36, 0)));
-	manager.Add(new RGB_ScrollBar({ 790, 35 }, { 900, 64 }, &colorForPainting, RGB(102, 255, 0)));
-	manager.Add(new RGB_ScrollBar({ 790, 67 }, { 900, 96 }, &colorForPainting, RGB(125, 249, 255)));
+	manager.Add(new RGB_ScrollBar({ 790, 3 }, { 900, 32 }, &colorForPainting, RED));
+	manager.Add(new RGB_ScrollBar({ 790, 35 }, { 900, 64 }, &colorForPainting, BLUE));
+	manager.Add(new RGB_ScrollBar({ 790, 67 }, { 900, 96 }, &colorForPainting, GREEN));
 
 	windowForButtons.DrawWindow();
 
@@ -113,12 +113,12 @@ void Spray()
 
 void SaveImage()
 {
-	txSaveImage("image.bmp");
+	txSaveImage("Lib\\image.bmp");
 }
 
 void OpenImage()
 {
-	HDC sourceImage = txLoadImage("image.bmp");
+	HDC sourceImage = txLoadImage("Lib\\image.bmp");
 	txTransparentBlt(0, 0, sourceImage);
 	txDeleteDC(sourceImage);
 }
