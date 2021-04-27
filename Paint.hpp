@@ -5,13 +5,6 @@
 #include <cmath>
 #include <ctime>
 
-#define RED RGB(255, 36, 0)
-#define GREEN RGB(102, 255, 0)
-#define BLUE RGB(125, 249, 255)
-
-typedef void (*func_t)(void);
-typedef double (*graph_t)(double x);
-
 struct Point
 {
 	double x, y;
@@ -29,9 +22,13 @@ void OpenImage();
 void PrevState();
 void NextState();
 
+typedef void (*func_t)(void);
 func_t FuncOfDrawing = &Pencil;
 
 COLORREF colorForPainting = TX_BLACK;
+const COLORREF RED = RGB(255, 36, 0);
+const COLORREF GREEN = RGB(102, 255, 0);
+const COLORREF BLUE = RGB(125, 249, 255);
 bool isParametrsChanged = true;
 double radiusForPainting = 24;
 const Point COORD_LT_OF_BUT = { 0, 0 };
@@ -46,9 +43,10 @@ HDC virtualCanvas = txCreateCompatibleDC(COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF
 
 class Window
 {
-public:
+protected:
 	Point coordLT, coordRB;
 
+public:
 	virtual void DrawWindow()
 	{
 		txSetColor(TX_LIGHTGRAY);
@@ -116,9 +114,10 @@ public:
 
 class SetColorButton : public BasicButton
 {
-public:
+protected:
 	COLORREF color;
 
+public:
 	virtual void DrawButton() override
 	{
 		txSetColor(TX_LIGHTGRAY);
@@ -140,22 +139,23 @@ public:
 
 class ScrollBar : public BasicButton
 {
-public:
+protected:
 	COLORREF rgbColor;
 	Point coordLT_OfBar;
 	Point coordRB_OfBar;
 	double* scroller;
 	double difference;
-	const int width = 7;
+	const int WIDTH = 7;
 
+public:
 	virtual void DrawButton() override
 	{
 		txSetColor(TX_LIGHTGRAY);
 		txSetFillColor(TX_WHITE);
-		txRectangle(coordLT.x - width, coordLT.y, coordRB.x + width, coordRB.y);
+		txRectangle(coordLT.x - WIDTH, coordLT.y, coordRB.x + WIDTH, coordRB.y);
 
-		coordLT_OfBar = { (coordRB.x + coordLT.x) / 2 - width, coordLT.y };
-		coordRB_OfBar = { (coordRB.x + coordLT.x) / 2 + width, coordRB.y };
+		coordLT_OfBar = { (coordRB.x + coordLT.x) / 2 - WIDTH, coordLT.y };
+		coordRB_OfBar = { (coordRB.x + coordLT.x) / 2 + WIDTH, coordRB.y };
 
 		txSetColor(TX_LIGHTGRAY);
 		txSetFillColor(rgbColor);
@@ -174,12 +174,12 @@ public:
 
 		txSetColor(TX_LIGHTGRAY);
 		txSetFillColor(TX_WHITE);
-		txRectangle(coordLT.x - width, coordLT.y, coordRB.x + width, coordRB.y);
+		txRectangle(coordLT.x - WIDTH, coordLT.y, coordRB.x + WIDTH, coordRB.y);
 
-		if (scroll > coordLT.x - width && scroll < coordRB.x + width)
+		if (scroll > coordLT.x - WIDTH && scroll < coordRB.x + WIDTH)
 		{
-			coordLT_OfBar.x = scroll - width;
-			coordRB_OfBar.x = scroll + width;
+			coordLT_OfBar.x = scroll - WIDTH;
+			coordRB_OfBar.x = scroll + WIDTH;
 
 			ActionWithRevolvable();
 
@@ -197,10 +197,11 @@ public:
 
 class RGB_ScrollBar : public ScrollBar
 {
-public:
+protected:
 	COLORREF* scrollerColor;
-	double rgbScroller;
+	double rgbScroller = 0;
 
+public:
 	virtual void ActionWithRevolvable() override
 	{
 		rgbScroller = 255 * ((coordRB_OfBar.x + coordLT_OfBar.x) / 2 - coordLT.x) / (coordRB.x - coordLT.x);
@@ -227,10 +228,11 @@ public:
 
 class FunctionalButton : public BasicButton
 {
-public:
+protected:
 	const char* name;
 	func_t function;
 
+public:
 	virtual void DrawButton() override
 	{
 		txSetColor(TX_LIGHTGRAY);
@@ -273,10 +275,11 @@ public:
 
 class InstrumentalButton : public BasicButton
 {
-public:
+protected:
 	const char* sourceImage;
 	func_t function;
 
+public:
 	virtual void DrawButton() override
 	{
 		txSetColor(TX_LIGHTGRAY, 3);
@@ -322,8 +325,8 @@ public:
 class Canvas : public BasicButton
 {
 public:
-	HDC canvas[NUM_OF_CANVAS] = {};
 	func_t function;
+	HDC canvas[NUM_OF_CANVAS] = {};
 	int indexOfCanvas;
 
 	void Add(HDC canvas_)
@@ -372,7 +375,12 @@ public:
 		{
 		}
 		indexOfCanvas = i - 1;
-		return canvas[i - 1];
+		if (indexOfCanvas <= 0)
+		{
+			indexOfCanvas = 0;
+			return canvas[0];
+		}
+		return canvas[indexOfCanvas];
 	}
 
 	HDC ReturnCurrentCanvas()
@@ -400,11 +408,11 @@ public:
 
 	~Canvas()
 	{
-		for (int i = 0; canvas[i] != NULL; ++i)
+		for (int i = 0; i < NUM_OF_CANVAS; ++i)
 		{
-			txDeleteDC(canvas[i]);
+			if (canvas[i] != NULL)
+				txDeleteDC(canvas[i]);
 		}
-		txDeleteDC(virtualCanvas);
 	}
 };
 

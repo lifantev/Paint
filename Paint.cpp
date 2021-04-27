@@ -54,6 +54,7 @@ void Clear()
 void ExitFromProgram()
 {
 	windowForPainting.~Canvas();
+	txDeleteDC(virtualCanvas);
 	exit(EXIT_SUCCESS);
 }
 
@@ -100,7 +101,7 @@ void Spray()
 						txSetPixel(coords.x - x, coords.y - y - COORD_LT_OF_MAIN_WINDOW.y, colorForPainting, windowForPainting.ReturnLastCanvas());
 					}
 					int time = 0;
-					while (time < 7000)
+					while (time < 5000)
 						time++;
 				}
 				if (txMouseButtons() == 0)
