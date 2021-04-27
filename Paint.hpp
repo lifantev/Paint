@@ -327,19 +327,15 @@ class Canvas : public BasicButton
 public:
 	func_t function;
 	HDC canvas[NUM_OF_CANVAS] = {};
-	int indexOfCanvas;
+	int indexOfCanvas = 0;
 
 	void Add(HDC canvas_)
 	{
-		int i;
-		for (i = 0; canvas[i] != NULL; ++i)
-		{
-		}
-		indexOfCanvas = i - 1;
-		canvas[i] = txCreateCompatibleDC(COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
+		canvas[indexOfCanvas] = txCreateCompatibleDC(COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
 			COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y);
-		txBitBlt(canvas[i], 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
+		txBitBlt(canvas[indexOfCanvas], 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
 			COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y, canvas_);
+		indexOfCanvas++;
 	}
 
 	virtual void DrawButton() override
@@ -349,17 +345,12 @@ public:
 		txRectangle(coordLT.x, coordLT.y - COORD_LT_OF_MAIN_WINDOW.y, coordRB.x, coordRB.y - COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
 		txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
 		Add(virtualCanvas);
-		Add(virtualCanvas);
 	}
 
 	virtual void Action() override
 	{
 		virtualCanvas = txCreateCompatibleDC(COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x, COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y);
-		int i;
-		for (i = indexOfCanvas + 2; canvas[i] != NULL; ++i)
-		{
-			canvas[i] = NULL;
-		}
+
 		txBitBlt(canvas[indexOfCanvas + 1], 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
 			COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y, canvas[indexOfCanvas]);
 		function();

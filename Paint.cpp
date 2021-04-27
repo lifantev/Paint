@@ -64,9 +64,9 @@ void Pencil()
 	while (txMouseButtons() == LEFT_MOUSE_BUTTON)
 	{
 		Point coords2 = { txMouseX(), txMouseY() };
-		txSetColor(colorForPainting, radiusForPainting, windowForPainting.ReturnLastCanvas());
-		txLine(coords1.x, coords1.y - COORD_LT_OF_MAIN_WINDOW.y, coords2.x, coords2.y - COORD_LT_OF_MAIN_WINDOW.y, windowForPainting.ReturnLastCanvas());
-		txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, windowForPainting.ReturnLastCanvas());
+		txSetColor(colorForPainting, radiusForPainting, virtualCanvas);
+		txLine(coords1.x, coords1.y - COORD_LT_OF_MAIN_WINDOW.y, coords2.x, coords2.y - COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+		txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
 		txSleep();
 		coords1 = coords2;
 	}
@@ -98,7 +98,7 @@ void Spray()
 					if (random % 2 == 1)
 					{
 						txSetPixel(coords.x - x, coords.y - y, colorForPainting);
-						txSetPixel(coords.x - x, coords.y - y - COORD_LT_OF_MAIN_WINDOW.y, colorForPainting, windowForPainting.ReturnLastCanvas());
+						txSetPixel(coords.x - x, coords.y - y - COORD_LT_OF_MAIN_WINDOW.y, colorForPainting, virtualCanvas);
 					}
 					int time = 0;
 					while (time < 5000)
