@@ -14,9 +14,12 @@ namespace Paint {
 
 	void Pencil();
 	void Eraser();
-	void Fill(double x, double y, COLORREF current);
-	void CoverForFill();
+	void Fill();
+	void Pipette();
 	void Spray();
+	void Line();
+	void Circle();
+	void Rectangle();
 	void Clear();
 	void Exit();
 	void SaveImage();
@@ -32,12 +35,16 @@ namespace Paint {
 	const COLORREF GREEN = RGB(102, 255, 0);
 	const COLORREF BLUE = RGB(125, 249, 255);
 	bool isParametrsChanged = true;
+	boolean isModified = false;
+	boolean isReterned = false;
+	bool isFigureFilled = false;
 	double radiusForPainting = 24;
 	const Point COORD_LT_OF_BUT = { 0, 0 };
 	const Point COORD_RB_OF_BUT = { 1200, 100 };
 	const Point COORD_LT_OF_MAIN_WINDOW = { 0, 100 };
 	const Point COORD_RB_OF_MAIN_WINDOW = { 1200, 600 };
 	const int LEFT_MOUSE_BUTTON = 1;
+	const int RIGHT_MOUSE_BUTTON = 2;
 	const int NUM_OF_CANVAS = 5000;
 	const int NUM_OF_BUTTONS = 50;
 	HDC virtualCanvas = txCreateCompatibleDC(COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x, COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y);
@@ -295,14 +302,14 @@ namespace Paint {
 
 		void RedrawButton1()
 		{
-			txSetColor(TX_BLACK, 5);
+			txSetColor(TX_BLACK, 3);
 			txSetFillColor(TX_TRANSPARENT);
 			txRectangle(coordLT.x, coordLT.y, coordRB.x, coordRB.y);
 		}
 
 		void RedrawButton2()
 		{
-			txSetColor(TX_WHITE, 5);
+			txSetColor(TX_WHITE, 3);
 			txSetFillColor(TX_TRANSPARENT);
 			txSleep();
 
@@ -326,8 +333,6 @@ namespace Paint {
 
 	class Canvas : public BasicButton
 	{
-	private:
-		boolean isModified = false;
 	public:
 		func_t function;
 		HDC canvas[NUM_OF_CANVAS] = {};
@@ -357,20 +362,23 @@ namespace Paint {
 		virtual void Action() override
 		{
 			function();
-			if (isModified == true)
+			Add(virtualCanvas);
+			isModified = true;
+			if (isReterned == true && isModified == true)
 			{
-				isModified = false;
+				isReterned = false;
 				for (int i = indexOfCanvas; i < NUM_OF_CANVAS - 1; ++i)
 				{
 					txDeleteDC(canvas[i]);
+					canvas[i] = NULL;
 				}
 			}
-			Add(virtualCanvas);
 		}
 
 		void ReturnLastCanvas()
 		{
-			isModified = true;
+			isReterned = true;
+			isModified = false;
 			if (indexOfCanvas == 1)
 			{
 				txBitBlt(virtualCanvas, 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,

@@ -9,6 +9,14 @@ int main()
 		txCreateWindow(1200, 600);
 		manager.Add(&windowForPainting);
 
+		manager.Add(new InstrumentalButton({ 210, 10 }, { 240, 40 }, Eraser, "Lib\\eraser.bmp"));
+		manager.Add(new InstrumentalButton({ 245, 10 }, { 275, 40 }, Pencil, "Lib\\pencil.bmp"));
+		manager.Add(new InstrumentalButton({ 280, 10 }, { 310, 40 }, Spray, "Lib\\spray.bmp"));
+		manager.Add(new InstrumentalButton({ 315, 10 }, { 345, 40 }, Pipette, "Lib\\pipette.bmp"));
+		manager.Add(new InstrumentalButton({ 350, 10 }, { 380, 40 }, Line, "Lib\\line.bmp"));
+		manager.Add(new InstrumentalButton({ 385, 10 }, { 415, 40 }, Circle, "Lib\\circle.bmp"));
+		manager.Add(new InstrumentalButton({ 420, 10 }, { 450, 40 }, Rectangle, "Lib\\rectangle.bmp"));
+
 		manager.Add(new SetColorButton({ 505, 10 }, { 530, 35 }, TX_BLACK));
 		manager.Add(new SetColorButton({ 530, 10 }, { 555, 35 }, TX_WHITE));
 		manager.Add(new SetColorButton({ 555, 10 }, { 580, 35 }, TX_LIGHTBLUE));
@@ -26,12 +34,8 @@ int main()
 		manager.Add(new FunctionalButton({ 0, 50 }, { 50, 100 }, "<<", PrevState));
 		manager.Add(new FunctionalButton({ 50, 50 }, { 100, 100 }, ">>", NextState));
 
-		manager.Add(new InstrumentalButton({ 225, 10 }, { 255, 40 }, Eraser, "Lib\\eraser.bmp"));
-		manager.Add(new InstrumentalButton({ 260, 10 }, { 290, 40 }, Pencil, "Lib\\pencil.bmp"));
-		manager.Add(new InstrumentalButton({ 295, 10 }, { 325, 40 }, Spray, "Lib\\spray.bmp"));
-
 		// TODO: filling, now works with stack corruption most of the time
-		//manager.Add(new InstrumentalButton({ 320, 10 }, { 350, 40 }, CoverForFill, "filling.bmp"));
+		//manager.Add(new InstrumentalButton({ 455, 10 }, { 485, 40 }, Fill, "Lib\\filling.bmp"));
 
 		manager.Add(new ScrollBar({ 267, 60 }, { 507, 90 }, &radiusForPainting, 6));
 
@@ -67,6 +71,34 @@ namespace Paint
 		txDeleteDC(virtualCanvas);
 		exit(EXIT_SUCCESS);
 	}
+
+	void Pipette()
+	{
+		colorForPainting = txGetPixel(txMouseX(), txMouseY());
+		isParametrsChanged = true;
+	}
+
+	//void Fill()
+	//{
+	//	txSetFillColor(colorForPainting);
+	//	//COLORREF color = txGetPixel(txMouseX(), txMouseY());
+	//	txSleep(100);
+	//	//txSetColor(color);
+	//	//txLine(200, 200, 100, 200, virtualCanvas);
+	//	Point coords;
+	//	while (txMouseButtons() == LEFT_MOUSE_BUTTON) 
+	//	{
+	//		coords = { txMouseX(), txMouseY() };
+	//	}
+	//	txFloodFill(coords.x, coords.y - COORD_LT_OF_MAIN_WINDOW.y, colorForPainting);
+	//	txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+	//	//txSleep();
+	//	/*txSetFillColor(TX_PINK);
+	//	txLine(100, 200, 150, 100);
+	//	txLine(150, 100, 200, 200);
+	//	txLine(200, 200, 100, 200);
+	//	txFloodFill(150, 150);*/
+	//}
 
 	void Pencil()
 	{
@@ -111,7 +143,7 @@ namespace Paint
 							txSetPixel(coords.x - x, coords.y - y - COORD_LT_OF_MAIN_WINDOW.y, colorForPainting, virtualCanvas);
 						}
 						int time = 0;
-						while (time < 5000)
+						while (time < 3000)
 							time++;
 					}
 					if (txMouseButtons() == 0)
@@ -122,23 +154,103 @@ namespace Paint
 		}
 	}
 
+	void Line() 
+	{
+		txSetColor(colorForPainting, radiusForPainting, virtualCanvas);
+		Point coords1 = { txMouseX(), txMouseY() };
+		Point coords2;
+		while (txMouseButtons() == LEFT_MOUSE_BUTTON) {
+		}
+		coords2 = { txMouseX(), txMouseY() };
+		txLine(coords1.x, coords1.y - COORD_LT_OF_MAIN_WINDOW.y, coords2.x, coords2.y - COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+		txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+		txSleep();
+	}
+
+	void Circle() 
+	{
+		txSetColor(colorForPainting, radiusForPainting, virtualCanvas);
+		
+		Point coords1 = { txMouseX(), txMouseY() };
+		Point coords2;
+
+		while (txMouseButtons() > 0)
+		{
+		}
+		if (GetAsyncKeyState(VK_LSHIFT))
+		{
+			txSetFillColor(colorForPainting, virtualCanvas);
+		}
+		else
+		{
+			txSetFillColor(TX_TRANSPARENT, virtualCanvas);
+		}
+
+		coords2 = { txMouseX(), txMouseY() };
+		double displacement = sqrt((coords1.x - coords2.x) * (coords1.x - coords2.x) + (coords2.y - coords1.y) * (coords2.y - coords1.y));
+		txEllipse(coords1.x - displacement, coords1.y - displacement - COORD_LT_OF_MAIN_WINDOW.y,
+			coords1.x + displacement, coords1.y + displacement - COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+		txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+		txSleep(1);
+	}
+
+	void Rectangle() 
+	{
+		txSetColor(colorForPainting, radiusForPainting, virtualCanvas);
+
+		Point coords1 = { txMouseX(), txMouseY() };
+		Point coords2;
+
+		while (txMouseButtons() > 0)
+		{
+		}
+		if (GetAsyncKeyState(VK_LSHIFT))
+		{
+			txSetFillColor(colorForPainting, virtualCanvas);
+		}
+		else
+		{
+			txSetFillColor(TX_TRANSPARENT, virtualCanvas);
+		}
+
+		coords2 = { txMouseX(), txMouseY() };
+		txRectangle(coords1.x, coords1.y - COORD_LT_OF_MAIN_WINDOW.y, coords2.x, coords2.y - COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+		txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+		txSleep(1);
+	}
+
 	void SaveImage()
 	{
 		HDC savingImage = txCreateCompatibleDC(COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
 			COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y);
 		txBitBlt(savingImage, 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
 			COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
-		txSaveImage("Lib\\image.bmp", savingImage);
+		const char* name = txInputBox ("File name: ", "Save image...", "Lib\\image.bmp");
+		if (!txSaveImage(name, savingImage))
+		{
+			txMessageBox("Warning : image wasn't saved!");
+		}
 		txDeleteDC(savingImage);
 	}
 
 	void OpenImage()
 	{
-		HDC sourceImage = txLoadImage("Lib\\image.bmp");
-		txBitBlt(virtualCanvas, 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
-			COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y, sourceImage);
-		txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
-		txDeleteDC(sourceImage);
+		const char* name = txInputBox("File name: ", "Open image...", "Lib\\image.bmp");
+		HDC sourceImage = txLoadImage(name);
+		if (sourceImage == NULL)
+		{
+			txMessageBox("Warning : image wasn't opened! Please, enter the correct filename. Only .bmp format supported.");
+		} 
+		else
+		{
+			txBitBlt(virtualCanvas, 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
+				COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y, sourceImage);
+			txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+			txDeleteDC(sourceImage);
+
+			isModified = true;
+			windowForPainting.Add(virtualCanvas);
+		}
 	}
 
 	void PrevState()
