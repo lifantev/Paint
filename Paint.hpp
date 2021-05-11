@@ -14,7 +14,8 @@ namespace Paint {
 
 	void Pencil();
 	void Eraser();
-	void Fill();
+	void Fill(double x, double y, COLORREF current);
+	void CoverForFill();
 	void Pipette();
 	void Spray();
 	void Line();
@@ -52,10 +53,8 @@ namespace Paint {
 
 	class Window
 	{
-	protected:
-		Point coordLT, coordRB;
-
 	public:
+		Point coordLT, coordRB;
 		virtual void DrawWindow()
 		{
 			txSetColor(TX_LIGHTGRAY);

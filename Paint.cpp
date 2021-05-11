@@ -1,4 +1,5 @@
 #include "Paint.hpp"
+#pragma comment(linker, "/STACK:257772160")
 
 int main()
 {
@@ -35,7 +36,7 @@ int main()
 		manager.Add(new FunctionalButton({ 50, 50 }, { 100, 100 }, ">>", NextState));
 
 		// TODO: filling, now works with stack corruption most of the time
-		//manager.Add(new InstrumentalButton({ 455, 10 }, { 485, 40 }, Fill, "Lib\\filling.bmp"));
+		manager.Add(new InstrumentalButton({ 455, 10 }, { 485, 40 }, CoverForFill, "Lib\\filling.bmp"));
 
 		manager.Add(new ScrollBar({ 267, 60 }, { 507, 90 }, &radiusForPainting, 6));
 
@@ -78,27 +79,30 @@ namespace Paint
 		isParametrsChanged = true;
 	}
 
-	//void Fill()
-	//{
-	//	txSetFillColor(colorForPainting);
-	//	//COLORREF color = txGetPixel(txMouseX(), txMouseY());
-	//	txSleep(100);
-	//	//txSetColor(color);
-	//	//txLine(200, 200, 100, 200, virtualCanvas);
-	//	Point coords;
-	//	while (txMouseButtons() == LEFT_MOUSE_BUTTON) 
-	//	{
-	//		coords = { txMouseX(), txMouseY() };
-	//	}
-	//	txFloodFill(coords.x, coords.y - COORD_LT_OF_MAIN_WINDOW.y, colorForPainting);
-	//	txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
-	//	//txSleep();
-	//	/*txSetFillColor(TX_PINK);
-	//	txLine(100, 200, 150, 100);
-	//	txLine(150, 100, 200, 200);
-	//	txLine(200, 200, 100, 200);
-	//	txFloodFill(150, 150);*/
-	//}
+	void Fill(double x, double y, COLORREF current) {
+		if (current == txGetPixel(x, y) &&
+			y > windowForPainting.coordLT.y &&
+			y < windowForPainting.coordRB.y &&
+			x > windowForPainting.coordLT.x &&
+			x < windowForPainting.coordRB.x) {
+			for (int i = -1; i <= 1; ++i) {
+				for (int j = -1; j <= 1; ++j) {
+					Fill(x + i, y + j, current);
+					txSetPixel(x, y - COORD_LT_OF_MAIN_WINDOW.y, colorForPainting, virtualCanvas);
+					txSetPixel(x, y, colorForPainting);
+				}
+			}
+		}
+		else {
+			return;
+		}
+	}
+
+	void CoverForFill() {
+		Point coords = { txMouseX(), txMouseY() };
+		COLORREF current = txGetPixel(coords.x, coords.y);
+		Fill(coords.x, coords.y, current);
+	}
 
 	void Pencil()
 	{
@@ -225,31 +229,37 @@ namespace Paint
 			COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y);
 		txBitBlt(savingImage, 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
 			COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
-		const char* name = txInputBox ("File name: ", "Save image...", "Lib\\image.bmp");
-		if (!txSaveImage(name, savingImage))
+		std::string name = txInputBox ("File name: ", "Save image...", "Lib\\image.bmp");
+		if (!name.empty())
 		{
-			txMessageBox("Warning : image wasn't saved!");
+			if (!txSaveImage(name.c_str(), savingImage))
+			{
+				txMessageBox("Warning : image wasn't saved!");
+			}
 		}
 		txDeleteDC(savingImage);
 	}
 
 	void OpenImage()
 	{
-		const char* name = txInputBox("File name: ", "Open image...", "Lib\\image.bmp");
-		HDC sourceImage = txLoadImage(name);
-		if (sourceImage == NULL)
+		std::string name = txInputBox("File name: ", "Open image...", "Lib\\image.bmp");
+		if (!name.empty())
 		{
-			txMessageBox("Warning : image wasn't opened! Please, enter the correct filename. Only .bmp format supported.");
-		} 
-		else
-		{
-			txBitBlt(virtualCanvas, 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
-				COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y, sourceImage);
-			txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
-			isModified = true;
-			windowForPainting.Add(virtualCanvas);
+			HDC sourceImage = txLoadImage(name.c_str());
+			if (sourceImage == NULL)
+			{
+				txMessageBox("Warning : image wasn't opened! Please, enter the correct filename. Only .bmp format supported.");
+			}
+			else
+			{
+				txBitBlt(virtualCanvas, 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
+					COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y, sourceImage);
+				txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
+				isModified = true;
+				windowForPainting.Add(virtualCanvas);
+			}
+			txDeleteDC(sourceImage);
 		}
-		txDeleteDC(sourceImage);
 	}
 
 	void PrevState()
