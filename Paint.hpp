@@ -352,7 +352,6 @@ namespace Paint {
 
 		virtual void DrawButton() override
 		{
-			txSetColor(TX_LIGHTGRAY, 2, virtualCanvas);
 			txSetFillColor(TX_WHITE, virtualCanvas);
 			txRectangle(coordLT.x, coordLT.y - COORD_LT_OF_MAIN_WINDOW.y, coordRB.x, coordRB.y - COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
 			txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);

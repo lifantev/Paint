@@ -246,11 +246,10 @@ namespace Paint
 			txBitBlt(virtualCanvas, 0, 0, COORD_RB_OF_MAIN_WINDOW.x - COORD_LT_OF_MAIN_WINDOW.x,
 				COORD_RB_OF_MAIN_WINDOW.y - COORD_LT_OF_MAIN_WINDOW.y, sourceImage);
 			txBitBlt(COORD_LT_OF_MAIN_WINDOW.x, COORD_LT_OF_MAIN_WINDOW.y, virtualCanvas);
-			txDeleteDC(sourceImage);
-
 			isModified = true;
 			windowForPainting.Add(virtualCanvas);
 		}
+		txDeleteDC(sourceImage);
 	}
 
 	void PrevState()
