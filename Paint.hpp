@@ -360,6 +360,7 @@ namespace Paint {
 		virtual void Action() override
 		{
 			function();
+			txDeleteDC(canvas[indexOfCanvas]);
 			Add(virtualCanvas);
 			isModified = true;
 			if (isReterned == true && isModified == true)
