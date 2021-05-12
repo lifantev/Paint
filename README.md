@@ -10,3 +10,4 @@ After compiling, everything is ready to use.
 ## Usage
 <br>Exit the programm using **exit** button.
 <br>Be careful with the **fill**, because it works slow with large areas.
+<br> All images are supported only in **.bmp** format.
